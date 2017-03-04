@@ -6,6 +6,11 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
+public interface IPrefabGeneration 
+{
+    GameObject GenerateFrom(string prefabPath);
+}
+
 public class NestedPrefab : MonoBehaviour {
 
     [HideInInspector]
@@ -19,6 +24,15 @@ public class NestedPrefab : MonoBehaviour {
     private const string pathSeparator = "//Nested//";
 
     private Dictionary<int, Transform> hierarchyDict;
+
+    public IPrefabGeneration prefabGenerator = null; 
+
+    void Awake()
+    {
+        if (prefabGenerator == null) {
+            prefabGenerator = new DefaultPrefabGeneration();
+        }
+    }
 
 	// Use this for initialization
 	public void SavePrefabData () {
@@ -54,6 +68,8 @@ public class NestedPrefab : MonoBehaviour {
                 goData.hierarchyPath = relativePath;
                 goData.hierarchyPathId = pathId;
 
+                goData.CopyFrom(child);
+
                 emptyObjectsData.Add(goData);
 
                 SavePrefabData(child, relativePath + pathSeparator + child.name, goData.id);
@@ -67,6 +83,8 @@ public class NestedPrefab : MonoBehaviour {
                 Debug.Log("prefabHierarchyPath " + data.hierarchyPath);
 
                 data.hierarchyPathId = pathId;
+
+                data.CopyFrom(child);
 
                 nestedPrefabsData.Add(data);
             }
@@ -91,8 +109,8 @@ public class NestedPrefab : MonoBehaviour {
     {
         Transform parent = GetHierarchyTransform(prefabData.hierarchyPathId);
 
-        GameObject prefab = AssetDatabase.LoadAssetAtPath(prefabData.prefabPath, typeof(GameObject)) as GameObject;
-        GameObject clone = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+        GameObject clone = prefabGenerator.GenerateFrom(prefabData.prefabPath);
+
         clone.transform.parent = parent;
 
         prefabData.CopyDataTo(clone.transform);
@@ -144,6 +162,29 @@ public class NestedPrefab : MonoBehaviour {
     }
 }
 
+public class DefaultPrefabGeneration : IPrefabGeneration
+{
+
+    public GameObject GenerateFrom(string prefabPath) {
+        GameObject prefab = null, clone = null;
+
+    #if UNITY_EDITOR
+        if (!Application.isPlaying) {
+            prefab =
+              (AssetDatabase.LoadAssetAtPath(prefabPath, typeof(Transform)) as Transform).gameObject;
+
+            clone = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+        }
+    #else
+        prefab = Resources.Load(prefabPath) as GameObject;
+        clone = Instantiate(prefab, Vector3.zero, Quaternion.identity) as GameObject;
+    #endif
+
+        return clone;
+    }
+
+}
+
 #if UNITY_EDITOR
 [CustomEditor(typeof(NestedPrefab))]
 public class NestedPrefabEditor : Editor {
@@ -155,6 +196,8 @@ public class NestedPrefabEditor : Editor {
         NestedPrefab nestedPrefab = target as NestedPrefab;
 
         if (nestedPrefab == null) return;
+
+        nestedPrefab.prefabGenerator = new DefaultPrefabGeneration();
 
         if (GUILayout.Button("Save Nested Prefabs")) {
             nestedPrefab.SavePrefabData();

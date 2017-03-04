@@ -25,6 +25,21 @@ public class GameObjectData {
         transformObject.localScale = new Vector3(scaleX, scaleY, scaleZ);
     }
 
+    public void CopyFrom(Transform transformObject)
+    {
+        positionX = transformObject.localPosition.x;
+        positionY = transformObject.localPosition.y;
+        positionZ = transformObject.localPosition.z;
+
+        rotationX = transformObject.localEulerAngles.x;
+        rotationY = transformObject.localEulerAngles.y;
+        rotationZ = transformObject.localEulerAngles.z;
+
+        scaleX = transformObject.localScale.x;
+        scaleY = transformObject.localScale.y;
+        scaleZ = transformObject.localScale.z;
+    }
+
 }
 
 [Serializable]
@@ -32,4 +47,6 @@ public class NestedPrefabData : GameObjectData {
 
     /// <summary> Path on assets folder </summary>
     public string prefabPath;
+
+    public GameObject prefabObject;
 }
