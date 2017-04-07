@@ -96,10 +96,10 @@ public class NestedPrefab : MonoBehaviour {
     /// Main method to generate prefabs using all saved data
     /// Attention: All children objects are going to be removed
     /// </summary>
-    public void GeneratePrefabs()
+    public void GeneratePrefabs(bool askPermission = true)
     {
     #if UNITY_EDITOR
-        if (!EditorUtility.DisplayDialog("Do want to update children objects?",
+        if (askPermission && !EditorUtility.DisplayDialog("Do want to update children objects?",
                 "Are you sure you want to update children objects? All current changes would be lost", "Yes", "I am not sure"))
         {
             return;
@@ -125,13 +125,28 @@ public class NestedPrefab : MonoBehaviour {
 
     void GeneratePrefab(NestedPrefabData prefabData)
     {
+        Debug.Log("GilLog - NestedPrefab::GeneratePrefab - prefabData " + prefabData.prefabPath + " ");
+
         Transform parent = GetHierarchyTransform(prefabData.hierarchyPathId);
 
         GameObject clone = prefabGenerator.GenerateFrom(prefabData.prefabPath);
 
+        if (clone == null)
+        {
+            Debug.LogError("Error when trying to generate prefab " + prefabData.prefabPath + " !", this);
+        }
+
         clone.transform.parent = parent;
 
         prefabData.CopyDataTo(clone.transform);
+
+        // Recursive generation
+        NestedPrefab nestedPrefab = clone.GetComponent<NestedPrefab>();
+        if (nestedPrefab != null)
+        {
+            nestedPrefab.prefabGenerator = prefabGenerator;
+            nestedPrefab.GeneratePrefabs(false);
+        }
     }
 
     void UpdateTransformFromIds()
