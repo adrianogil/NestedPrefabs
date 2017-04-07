@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-public interface IPrefabGeneration 
+public interface IPrefabGeneration
 {
     GameObject GenerateFrom(string prefabPath);
 }
@@ -25,7 +25,7 @@ public class NestedPrefab : MonoBehaviour {
 
     private Dictionary<int, Transform> hierarchyDict;
 
-    public IPrefabGeneration prefabGenerator = null; 
+    public IPrefabGeneration prefabGenerator = null;
 
     void Awake()
     {
@@ -92,17 +92,35 @@ public class NestedPrefab : MonoBehaviour {
 #endif
     }
 
+    /// <summary>
+    /// Main method to generate prefabs using all saved data
+    /// Attention: All children objects are going to be removed
+    /// </summary>
     public void GeneratePrefabs()
     {
+    #if UNITY_EDITOR
+        if (!EditorUtility.DisplayDialog("Do want to update children objects?",
+                "Are you sure you want to update children objects? All current changes would be lost", "Yes", "I am not sure"))
+        {
+            return;
+        }
+
+        // Store the states of 'root' and its children.
+        Undo.RegisterFullObjectHierarchyUndo(gameObject, "NestedPrefab update");
+    #endif
+
+        // Destroy all children objects in order to recreate them according to internal data
         DestroyChildren();
 
+        // Create empty objects
         UpdateTransformFromIds();
 
+        // Generate all prefabs
         for (int i = 0; i < nestedPrefabsData.Count; i++)
         {
             GeneratePrefab(nestedPrefabsData[i]);
         }
-    }    
+    }
 
 
     void GeneratePrefab(NestedPrefabData prefabData)
@@ -121,7 +139,7 @@ public class NestedPrefab : MonoBehaviour {
         hierarchyDict = new Dictionary<int, Transform>();
         hierarchyDict.Add(0, transform);
 
-        UpdateTransformFromIds(0, transform);        
+        UpdateTransformFromIds(0, transform);
     }
 
     void UpdateTransformFromIds(int id, Transform parent)
@@ -158,7 +176,7 @@ public class NestedPrefab : MonoBehaviour {
         for (int i = transform.childCount-1; i >= 0; i--)
         {
             DestroyImmediate(transform.GetChild(i).gameObject);
-        } 
+        }
     }
 }
 
@@ -203,9 +221,9 @@ public class NestedPrefabEditor : Editor {
             nestedPrefab.SavePrefabData();
         }
 
-        if (GUILayout.Button("Generate Prefabs")) {
+        if (GUILayout.Button("Revert Prefabs")) {
             nestedPrefab.GeneratePrefabs();
-        }        
+        }
     }
 
 }
