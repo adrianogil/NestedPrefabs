@@ -125,7 +125,7 @@ public class NestedPrefab : MonoBehaviour {
 
     void GeneratePrefab(NestedPrefabData prefabData)
     {
-        Debug.Log("GilLog - NestedPrefab::GeneratePrefab - prefabData " + prefabData.prefabPath + " ");
+        // Debug.Log("NestedPrefab::GeneratePrefab - prefabData " + prefabData.prefabPath + " ");
 
         Transform parent = GetHierarchyTransform(prefabData.hierarchyPathId);
 
@@ -145,7 +145,7 @@ public class NestedPrefab : MonoBehaviour {
         if (nestedPrefab != null)
         {
             nestedPrefab.prefabGenerator = prefabGenerator;
-            nestedPrefab.GeneratePrefabs(false);
+            nestedPrefab.GeneratePrefabs(false); // Avoid to ask permission twice
         }
     }
 
