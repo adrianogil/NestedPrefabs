@@ -64,7 +64,6 @@ public class NestedPrefab : MonoBehaviour {
                 currentId++;
                 goData.id = currentId;
 
-                goData.name = child.name;
                 goData.hierarchyPath = relativePath;
                 goData.hierarchyPathId = pathId;
 
@@ -78,9 +77,9 @@ public class NestedPrefab : MonoBehaviour {
                 NestedPrefabData data = new NestedPrefabData();
 
                 data.prefabPath = AssetDatabase.GetAssetPath(prefabParent);
-                Debug.Log("Prefab path = " + data.prefabPath);
+                // Debug.Log("Prefab path = " + data.prefabPath);
                 data.hierarchyPath = relativePath;
-                Debug.Log("prefabHierarchyPath " + data.hierarchyPath);
+                // Debug.Log("prefabHierarchyPath " + data.hierarchyPath);
 
                 data.hierarchyPathId = pathId;
 

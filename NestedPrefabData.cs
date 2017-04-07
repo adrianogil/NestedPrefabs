@@ -18,15 +18,23 @@ public class GameObjectData {
 
     public float scaleX, scaleY, scaleZ;
 
+    public bool active;
+
     public void CopyDataTo(Transform transformObject)
     {
+        transformObject.name = name;
+
         transformObject.localPosition = new Vector3(positionX, positionY, positionZ);
         transformObject.localEulerAngles = new Vector3(rotationX, rotationY, rotationZ);
         transformObject.localScale = new Vector3(scaleX, scaleY, scaleZ);
+
+        transformObject.gameObject.SetActive(active);
     }
 
     public void CopyFrom(Transform transformObject)
     {
+        name = transformObject.name;
+
         positionX = transformObject.localPosition.x;
         positionY = transformObject.localPosition.y;
         positionZ = transformObject.localPosition.z;
@@ -38,6 +46,8 @@ public class GameObjectData {
         scaleX = transformObject.localScale.x;
         scaleY = transformObject.localScale.y;
         scaleZ = transformObject.localScale.z;
+
+        active = transformObject.gameObject.activeSelf;
     }
 
 }
