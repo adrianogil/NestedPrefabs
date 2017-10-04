@@ -23,6 +23,10 @@ public class NestedPrefab : MonoBehaviour {
 
     private const string pathSeparator = "//Nested//";
 
+    [HideInInspector]
+    [SerializeField]
+    public bool prefabDetailsVisibility = false;
+
     private Dictionary<int, Transform> hierarchyDict;
 
     public IPrefabGeneration prefabGenerator = null;
@@ -43,6 +47,12 @@ public class NestedPrefab : MonoBehaviour {
 
         SavePrefabData(transform, "", currentId);
 	}
+
+    [ContextMenu("Toggle Prefabs Details")]
+    public void TogglePrefabsDetails() 
+    {
+        prefabDetailsVisibility = !prefabDetailsVisibility;
+    }
 
     private static int currentId = 0; // Id 0 corresponds to Prefab Root
 
@@ -238,6 +248,28 @@ public class NestedPrefabEditor : Editor {
         if (GUILayout.Button("Revert Prefabs")) {
             nestedPrefab.GeneratePrefabs();
         }
+
+        if (nestedPrefab.prefabDetailsVisibility)
+        {
+            EditorGUILayout.Space();        
+
+            EditorGUILayout.LabelField("List of Nested Prefabs:", EditorStyles.boldLabel);
+
+            EditorGUILayout.Space();
+
+            for (int i = 0; i < nestedPrefab.nestedPrefabsData.Count; i++)
+            {
+                NestedPrefabData prefabData = nestedPrefab.nestedPrefabsData[i];
+                
+                // GameObject prefabParent = PrefabUtility.GetPrefabParent(prefabData.prefabObject) as GameObject;
+                // string prefabPath = AssetDatabase.GetAssetPath(prefabParent);
+
+                EditorGUILayout.LabelField("" + i + ". " + prefabData.hierarchyPath + " from " + prefabData.prefabPath);
+
+                // PrefabUtility.GetPropertyModifications
+            }
+        }
+        
     }
 
 }
